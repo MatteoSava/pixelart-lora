@@ -1,8 +1,8 @@
 # train-jalb
 
 LoRA training and inference tooling for a small grayscale pixel-art character style. The training pipeline uses the public
-[`mattsava/nob`](https://huggingface.co/datasets/mattsava/nob) dataset, runs SDXL fine-tuning jobs on Modal GPUs, and
-ships with a local Gradio app backed by a remote Modal inference function.
+[`mattsava/nob`](https://huggingface.co/datasets/mattsava/nob) dataset, fine-tunes SDXL on Modal GPUs, and ships with a
+local Gradio app backed by a remote Modal inference function.
 
 This is a deliberately constrained image problem. The target style is not "make a cute character" in a continuous
 photographic space; the model has to stay inside a low-resolution pixel-art language: blocky silhouettes, hard nearest
@@ -25,7 +25,7 @@ back with nearest-neighbor interpolation, and snaps every pixel to one of six fi
 loss learn from the same kind of image we want at sampling time instead of asking an auxiliary loss to fix the style after
 the fact.
 
-## What The Pipeline Does
+## What the Pipeline Does
 
 - Loads the Hugging Face dataset through a small `Dataset` wrapper.
 - Applies the pixel-art transform in the data pipeline, before VAE encoding.
@@ -43,9 +43,9 @@ hard edges, simple body shapes, and minimal facial detail.
 
 ![Gradio demo using the Modal-backed inference function](assets/gradio-demo.png)
 
-The examples below are useful because they are not just near-copies of the training images. They ask the LoRA to apply the
-same visual grammar to different subjects: a portrait, a house, and an animal. The interesting part is the consistency:
-flat grayscale areas, thick pixel outlines, simple readable shapes, and no photographic texture.
+These examples are there for a specific reason. They are not near-copies of the training images; they ask the LoRA to use
+the same visual grammar on different subjects: a portrait, a house, and an animal. The consistency is the point here:
+flat grayscale areas, thick pixel outlines, readable shapes, and no photographic texture.
 
 <p align="center">
   <img src="assets/example-musk.jpg" alt="Grayscale pixel-art portrait generated with the custom LoRA" width="32%">
@@ -114,7 +114,7 @@ Download a trained checkpoint from the Modal output volume:
 uv run modal volume get jalb-lora-outputs /jalb-lora-v2 ./jalb-lora-v2
 ```
 
-## Run The Gradio App
+## Run the Gradio App
 
 Deploy the Modal GPU functions:
 
