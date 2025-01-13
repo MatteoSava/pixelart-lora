@@ -43,6 +43,19 @@ hard edges, simple body shapes, and minimal facial detail.
 
 ![Gradio demo using the Modal-backed inference function](assets/gradio-demo.png)
 
+The examples below are useful because they are not just near-copies of the training images. They ask the LoRA to apply the
+same visual grammar to different subjects: a portrait, a house, and an animal. The interesting part is the consistency:
+flat grayscale areas, thick pixel outlines, simple readable shapes, and no photographic texture.
+
+<p align="center">
+  <img src="assets/example-musk.jpg" alt="Grayscale pixel-art portrait generated with the custom LoRA" width="32%">
+  <img src="assets/example-house.jpg" alt="Grayscale pixel-art house generated with the custom LoRA" width="32%">
+  <img src="assets/example-cow.jpg" alt="Grayscale pixel-art cow generated with the custom LoRA" width="32%">
+</p>
+<p align="center">
+  <sub>Portrait prompt, house prompt, and cow prompt rendered into the same constrained grayscale pixel-art style.</sub>
+</p>
+
 The ROB checkpoint contains FLUX `transformer.*` LoRA weights plus text-encoder keys. The demo loads the transformer LoRA
 weights only; the text-encoder keys hit a Diffusers PEFT conversion edge case in the pinned stack.
 
@@ -144,6 +157,9 @@ tests/
   test_sdxl_helpers.py
 assets/
   dataset-samples.png
+  example-cow.jpg
+  example-house.jpg
+  example-musk.jpg
   gradio-demo.png
   target-transform.png
 ```
