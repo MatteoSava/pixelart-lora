@@ -1,13 +1,52 @@
 # train-jalb
 
-SDXL LoRA training pipeline for a grayscale pixel-art JALB character, backed by the public
-[`mattsava/nob`](https://huggingface.co/datasets/mattsava/nob) dataset and executed on Modal GPUs.
+LoRA training and inference tooling for a small grayscale pixel-art character style. The training pipeline uses the public
+[`mattsava/nob`](https://huggingface.co/datasets/mattsava/nob) dataset, runs SDXL fine-tuning jobs on Modal GPUs, and
+ships with a local Gradio app backed by a remote Modal inference function.
 
-The training data is quantized in the image pipeline to six fixed gray levels before VAE encoding. The UNet receives full
-SDXL conditioning: both text encoders, concatenated penultimate hidden states, pooled CLIP-bigG embeddings, and SDXL time
-IDs.
+This is a deliberately constrained image problem. The target style is not "make a cute character" in a continuous
+photographic space; the model has to stay inside a low-resolution pixel-art language: blocky silhouettes, hard nearest
+neighbor edges, a small grayscale palette, and readable character features built out of very few pixels.
 
-## Setup
+![Samples from the training dataset](assets/dataset-samples.png)
+
+## Why This Is Hard
+
+Most diffusion models are comfortable with smooth texture, lighting, soft edges, and gradual color transitions. This
+dataset asks for almost the opposite. A good sample needs to preserve a discrete grid, land on a tiny set of gray levels,
+and still complete the character style when the prompt changes.
+
+The training target is therefore shaped before it reaches the VAE:
+
+![Training target transform](assets/target-transform.png)
+
+The preprocessing step converts each image to grayscale, downsamples it to a low-resolution working grid, upsamples it
+back with nearest-neighbor interpolation, and snaps every pixel to one of six fixed gray levels. That makes the diffusion
+loss learn from the same kind of image we want at sampling time instead of asking an auxiliary loss to fix the style after
+the fact.
+
+## What The Pipeline Does
+
+- Loads the Hugging Face dataset through a small `Dataset` wrapper.
+- Applies the pixel-art transform in the data pipeline, before VAE encoding.
+- Fine-tunes SDXL attention layers with LoRA adapters through PEFT.
+- Uses full SDXL conditioning: CLIP-L, CLIP-bigG, penultimate hidden states, pooled text embeddings, and time IDs.
+- Runs training remotely on Modal with pinned dependencies and persistent cache/output volumes.
+- Exposes a Gradio UI that calls a deployed Modal GPU function for generation.
+
+## Demo
+
+The local Gradio app calls Modal for inference and currently uses
+[`mattsava/rob-lora-checkpoint-2500`](https://huggingface.co/mattsava/rob-lora-checkpoint-2500) on top of
+`black-forest-labs/FLUX.1-dev`. The checkpoint captures the same kind of pixel-art constraints: reduced grayscale range,
+hard edges, simple body shapes, and minimal facial detail.
+
+![Gradio demo using the Modal-backed inference function](assets/gradio-demo.png)
+
+The ROB checkpoint contains FLUX `transformer.*` LoRA weights plus text-encoder keys. The demo loads the transformer LoRA
+weights only; the text-encoder keys hit a Diffusers PEFT conversion edge case in the pinned stack.
+
+## Modal Setup
 
 Install and sync the pinned environment:
 
@@ -21,14 +60,21 @@ Authenticate Modal:
 uv run modal setup
 ```
 
-Create a Hugging Face secret for Modal. This is recommended for SDXL downloads, especially if your account needs to
-accept model terms:
+Create a Hugging Face secret for Modal. This is recommended for SDXL and FLUX downloads, especially if the account needs
+to accept model terms:
 
 ```bash
 uv run modal secret create huggingface-secret HF_TOKEN=hf_your_token_here
 ```
 
-## Train on Modal
+The Modal app uses:
+
+- `jalb-hf-cache` for Hugging Face model and dataset cache.
+- `jalb-lora-outputs` for trained LoRA checkpoints.
+- `A100-40GB` GPU functions for both training and inference.
+- A pinned Modal image built with `uv_pip_install`.
+
+## Train
 
 ```bash
 uv run modal run src/train_jalb/modal_app.py \
@@ -39,7 +85,7 @@ uv run modal run src/train_jalb/modal_app.py \
   --mixed-precision bf16
 ```
 
-Optional quantization regularizer:
+Optional low-noise quantization regularizer:
 
 ```bash
 uv run modal run src/train_jalb/modal_app.py \
@@ -49,20 +95,13 @@ uv run modal run src/train_jalb/modal_app.py \
   --quant-reg-max-t 200
 ```
 
-Outputs are saved in the Modal volume `jalb-lora-outputs`, under the chosen output name:
+Download a trained checkpoint from the Modal output volume:
 
 ```bash
 uv run modal volume get jalb-lora-outputs /jalb-lora-v2 ./jalb-lora-v2
 ```
 
-## Local Checks
-
-```bash
-uv run pytest
-uv run ruff check .
-```
-
-## Gradio Demo
+## Run The Gradio App
 
 Deploy the Modal GPU functions:
 
@@ -70,16 +109,21 @@ Deploy the Modal GPU functions:
 uv run modal deploy src/train_jalb/modal_app.py
 ```
 
-Launch the local Gradio UI:
+Launch the local UI:
 
 ```bash
 uv run python -m train_jalb.gradio_app
 ```
 
-Open `http://127.0.0.1:7860`. The UI calls the deployed `generate_remote` Modal function and uses the
-`mattsava/rob-lora-checkpoint-2500` LoRA over FLUX. The checkpoint includes FLUX `transformer.*` weights and CLIP
-text-encoder keys; the demo loads the transformer weights because the text-encoder keys hit a Diffusers PEFT conversion
-edge case in the pinned stack.
+Open `http://127.0.0.1:7860`.
+
+## Local Checks
+
+```bash
+uv run pytest
+uv run ruff check .
+uv lock --locked
+```
 
 ## Project Layout
 
@@ -88,13 +132,18 @@ src/train_jalb/
   config.py      Training configuration and validation
   data.py        Hugging Face dataset wrapper and collate function
   gradio_app.py  Local Gradio UI backed by Modal inference
-  inference.py   SDXL LoRA generation helpers
-  modal_app.py   Modal image, volumes, GPU function, and local entrypoint
+  inference.py   FLUX LoRA inference helpers for the demo
+  modal_app.py   Modal image, volumes, GPU functions, and local entrypoint
   quantization.py
                  Six-level grayscale quantizer and pixel-art transform
   sdxl.py        SDXL prompt/time/x0 helper functions
-  train.py       Framework-agnostic training loop
+  train.py       SDXL LoRA training loop
 tests/
+  test_inference.py
   test_quantization.py
   test_sdxl_helpers.py
+assets/
+  dataset-samples.png
+  gradio-demo.png
+  target-transform.png
 ```

@@ -13,6 +13,9 @@
 - [TODO] Add gallery persistence for selected Gradio outputs
 - [TODO] Add a Modal web deployment if the demo should run without a local Gradio process
 
+## Documentation
+- [TODO] Add a script to regenerate README visual assets
+
 ## Notes
 - Dataset source: `mattsava/nob`
 - Output volume: `jalb-lora-outputs`
