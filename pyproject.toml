@@ -1,0 +1,45 @@
+[project]
+name = "train-jalb"
+version = "0.1.0"
+description = "SDXL LoRA training pipeline for grayscale JALB pixel art on Modal"
+readme = "README.md"
+authors = [
+    { name = "Matteo Savariso", email = "matteo.savariso@gmail.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "accelerate==1.13.0",
+    "datasets==4.8.5",
+    "diffusers==0.37.1",
+    "gradio==6.14.0",
+    "huggingface-hub==1.14.0",
+    "modal==1.4.2",
+    "peft==0.19.1",
+    "pillow==12.2.0",
+    "safetensors==0.7.0",
+    "torch==2.11.0",
+    "torchvision==0.26.0",
+    "tqdm==4.67.3",
+    "transformers==5.8.0",
+]
+
+[build-system]
+requires = ["uv_build==0.11.2"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest==9.0.3",
+    "ruff==0.15.12",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["SIM108"]
