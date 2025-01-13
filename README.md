@@ -1,4 +1,4 @@
-# train-jalb
+# pixelart-lora
 
 ![Gradio demo using the Modal-backed inference function](assets/gradio-demo.png)
 

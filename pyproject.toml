@@ -1,7 +1,7 @@
 [project]
-name = "train-jalb"
+name = "pixelart-lora"
 version = "0.1.0"
-description = "SDXL LoRA training pipeline for grayscale JALB pixel art on Modal"
+description = "LoRA training pipeline for grayscale pixel art on Modal"
 readme = "README.md"
 authors = [
     { name = "Matteo Savariso", email = "matteo.savariso@gmail.com" }
@@ -26,6 +26,9 @@ dependencies = [
 [build-system]
 requires = ["uv_build==0.11.2"]
 build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "train_jalb"
 
 [dependency-groups]
 dev = [
