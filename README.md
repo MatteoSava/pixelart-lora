@@ -1,5 +1,7 @@
 # train-jalb
 
+![Gradio demo using the Modal-backed inference function](assets/gradio-demo.png)
+
 LoRA training and inference tooling for a small grayscale pixel-art character style. The training pipeline uses the public
 [`mattsava/nob`](https://huggingface.co/datasets/mattsava/nob) dataset, fine-tunes SDXL on Modal GPUs, and ships with a
 local Gradio app backed by a remote Modal inference function.
@@ -40,8 +42,6 @@ The local Gradio app calls Modal for inference and currently uses
 [`mattsava/rob-lora-checkpoint-2500`](https://huggingface.co/mattsava/rob-lora-checkpoint-2500) on top of
 `black-forest-labs/FLUX.1-dev`. The checkpoint captures the same kind of pixel-art constraints: reduced grayscale range,
 hard edges, simple body shapes, and minimal facial detail.
-
-![Gradio demo using the Modal-backed inference function](assets/gradio-demo.png)
 
 These examples are there for a specific reason. They are not near-copies of the training images; they ask the LoRA to use
 the same visual grammar on different subjects: a portrait, a house, and an animal. The consistency is the point here:
