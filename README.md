@@ -1,7 +1,5 @@
 # pixelart-lora
 
-![Gradio demo using the Modal-backed inference function](assets/gradio-demo.png)
-
 LoRA training and inference tooling for a small grayscale pixel-art character style. The training pipeline uses the public
 [`mattsava/nob`](https://huggingface.co/datasets/mattsava/nob) dataset, fine-tunes SDXL on Modal GPUs, and ships with a
 local Gradio app backed by a remote Modal inference function.
@@ -160,6 +158,5 @@ assets/
   example-cow.jpg
   example-house.jpg
   example-musk.jpg
-  gradio-demo.png
   target-transform.png
 ```
