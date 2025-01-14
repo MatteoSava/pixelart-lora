@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "LoRA training pipeline for grayscale pixel art on Modal"
 readme = "README.md"
 authors = [
-    { name = "Matteo Savariso", email = "matteo.savariso@gmail.com" }
+    { name = "Matteo Sava" }
 ]
 requires-python = ">=3.11"
 dependencies = [
